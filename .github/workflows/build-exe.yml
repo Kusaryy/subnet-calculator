@@ -1,0 +1,44 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Abhängigkeiten installieren
+        run: |
+          pip install PyQt6 pyinstaller
+
+      - name: EXE bauen
+        run: |
+          pyinstaller --onefile --windowed --name "Subnetzrechner" subnet_gui.py
+
+      - name: EXE als Artifact hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: Subnetzrechner-Windows
+          path: dist/Subnetzrechner.exe
+          retention-days: 30
+
+      - name: Release erstellen
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: "Subnetzrechner v${{ github.run_number }}"
+          body: "Automatisch gebaute Windows-EXE aus dem aktuellen Commit."
+          files: dist/Subnetzrechner.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
