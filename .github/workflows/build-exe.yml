@@ -32,7 +32,7 @@ jobs:
           python-version: "3.12"
 
       - name: Abhängigkeiten installieren
-        run: pip install PyQt6 pyinstaller
+        run: pip install pyinstaller
 
       - name: EXE bauen (Windows)
         if: runner.os == 'Windows'
