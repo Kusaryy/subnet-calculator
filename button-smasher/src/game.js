@@ -199,6 +199,29 @@ const BUTTON_LABELS = {
   phase4: ['NEEEEIIN!', 'AAAAARGH!', '💀 ICH STERBE 💀', 'WARUMMMM', 'ICH GEH!!'],
 };
 
+const MEMES = {
+  smug:       { emoji: '( ͡° ͜ʖ ͡°)', text: 'SKILL ISSUE.' },
+  nervous:    { emoji: '😰',           text: 'W-WARTE MAL—' },
+  flee:       { emoji: '🏃',           text: 'ICH BIN SCHNELL. DU NICHT.' },
+  panic:      { emoji: '💀',           text: '[PANIK.exe hat aufgehört zu reagieren]' },
+  denial:     { emoji: '🔥',           text: 'THIS IS FINE.' },
+  plead:      { emoji: '🙏',           text: 'BITTE. ICH FLEHE DICH AN.' },
+  inv:        { emoji: '🛡️',           text: 'SCHILD AKTIV. VERSUCH WAS.' },
+  counter:    { emoji: '⚡',           text: 'DAS GEHT JETZT SO NICHT WEITER.' },
+  speed:      { gif: 'assets/memes/meme-speed.gif',      text: 'I AM SPEED.' },
+  panik:      { gif: 'assets/memes/meme-panik.gif',      text: 'TOTALE PANIK.' },
+  thisisfine: { gif: 'assets/memes/meme-thisisfine.gif', text: 'ALLES GUT HIER. 🔥' },
+  nope:       { gif: 'assets/memes/meme-nope.gif',       text: 'NOPE. NOPE. NOPE.' },
+};
+
+const LEVEL_MEME_POOL = {
+  1: ['smug', 'smug'],
+  2: ['nervous', 'inv'],
+  3: ['flee', 'nervous'],
+  4: ['panic', 'counter'],
+  5: ['thisisfine', 'plead', 'denial'],
+};
+
 // ─── STATE ─────────────────────────────────────────────────────────────────
 
 let state = buildState();
@@ -451,6 +474,48 @@ function spawnComboText(x, y, combo) {
   el.style.top  = `${y}px`;
   dom.particles.appendChild(el);
   setTimeout(() => el.remove(), 1050);
+}
+
+// ─── MEME SYSTEM ───────────────────────────────────────────────────────────
+
+let memeHideTimer = null;
+
+function showMeme(key) {
+  const m = MEMES[key];
+  if (!m) return;
+  if (memeHideTimer) { clearTimeout(memeHideTimer); memeHideTimer = null; }
+
+  const lvl = state.currentLevel.id;
+  dom.memeCard.className = `level-${lvl}`;
+  dom.memeCard.classList.toggle('has-gif', !!m.gif);
+
+  if (m.gif) {
+    dom.memeGif.src          = m.gif;
+    dom.memeText.textContent = m.text;
+    dom.memeEmoji.textContent = '';
+  } else {
+    dom.memeEmoji.textContent = m.emoji || '';
+    dom.memeText.textContent  = m.text  || '';
+    dom.memeGif.src = '';
+  }
+
+  dom.memeCard.classList.add('visible');
+
+  memeHideTimer = setTimeout(() => {
+    dom.memeCard.classList.remove('visible');
+  }, m.gif ? 3500 : 2000);
+}
+
+function scheduleMeme() {
+  if (!state.currentLevel.memeFreq || state.isGameOver) return;
+  const jitter = state.currentLevel.memeFreq * 0.5;
+  state.memeTimer = setTimeout(() => {
+    if (!state.isGameOver) {
+      const pool = LEVEL_MEME_POOL[state.currentLevel.id] || [];
+      if (pool.length) showMeme(pool[Math.floor(Math.random() * pool.length)]);
+    }
+    scheduleMeme();
+  }, state.currentLevel.memeFreq + Math.random() * jitter);
 }
 
 // ─── UI UPDATE ─────────────────────────────────────────────────────────────
