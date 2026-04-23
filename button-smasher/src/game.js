@@ -820,6 +820,36 @@ function scheduleNextInv() {
   state.invCooldownTimer = setTimeout(startInvincibility, cfg.cooldownMs);
 }
 
+// ─── COUNTER-ATTACK ────────────────────────────────────────────────────────
+
+function getEffectiveCounterConfig() {
+  const lvl = state.currentLevel;
+  if (!lvl.counter.enabled) return null;
+  if (lvl.id === 5 && state.currentSubPhase) {
+    const sub = lvl.subPhases[state.currentSubPhase];
+    if (sub?.counter) return { ...lvl.counter, ...sub.counter };
+  }
+  return lvl.counter;
+}
+
+function triggerCounterAttack() {
+  if (state.counterActive || state.isGameOver) return;
+  state.counterActive = true;
+
+  dom.caOverlay.classList.remove('active');
+  void dom.caOverlay.offsetWidth;
+  dom.caOverlay.classList.add('active');
+
+  screenShake('heavy');
+  showMeme('counter');
+
+  const cfg = getEffectiveCounterConfig();
+  setTimeout(() => {
+    dom.caOverlay.classList.remove('active');
+    state.counterActive = false;
+  }, (cfg?.durationMs ?? 800) + 400);
+}
+
 // ─── CLICK HANDLER ─────────────────────────────────────────────────────────
 
 function handleClick(e) {
@@ -860,6 +890,13 @@ function handleClick(e) {
 
   // Audio
   audio.playHit(cps, state.combo);
+
+  state.hitsSinceLastCounter++;
+  const counterCfg = getEffectiveCounterConfig();
+  if (counterCfg && state.hitsSinceLastCounter >= counterCfg.triggerEveryNHits) {
+    state.hitsSinceLastCounter = 0;
+    triggerCounterAttack();
+  }
 
   // Animations
   triggerHitAnimation(cps);
