@@ -276,8 +276,6 @@ function initDom() {
   dom.particles     = document.getElementById('particles');
   dom.gameScreen    = document.getElementById('game-screen');
   dom.flashOverlay  = document.getElementById('flash-overlay');
-  dom.breakOverlay  = document.getElementById('break-overlay');
-  dom.breakMessage  = document.getElementById('break-message');
   dom.levelNum        = document.getElementById('level-num');
   dom.levelName       = document.getElementById('level-name');
   dom.invLabel        = document.getElementById('inv-label');
@@ -940,12 +938,16 @@ function handleClick(e) {
 
 function init() {
   initDom();
-  dom.button.addEventListener('click', handleClick);
 
-  dom.button.setAttribute('data-phase', '1');
+  dom.button.addEventListener('click', handleClick);
+  dom.restartBtn.addEventListener('click', () => {
+    dom.victoryScreen.classList.remove('visible');
+    state = buildState();
+    startLevel(0);
+  });
+
   document.body.setAttribute('data-phase', '1');
-  dom.tauntText.textContent = TAUNTS.idle[0];
-  startDecay();
+  startLevel(0);
 }
 
 document.addEventListener('DOMContentLoaded', init);
