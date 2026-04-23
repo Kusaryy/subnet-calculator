@@ -739,10 +739,56 @@ function triggerVictory() {
   }, 2200);
 }
 
+// ─── INVINCIBILITY ─────────────────────────────────────────────────────────
+
+function getEffectiveInvConfig() {
+  const lvl = state.currentLevel;
+  if (!lvl.invincible.enabled) return null;
+  if (lvl.id === 5 && state.currentSubPhase) {
+    const sub = lvl.subPhases[state.currentSubPhase];
+    if (sub?.invincible) return { enabled: true, durationMs: lvl.invincible.durationMs, cooldownMs: lvl.invincible.cooldownMs, ...sub.invincible };
+  }
+  return lvl.invincible;
+}
+
+function startInvincibility() {
+  const cfg = getEffectiveInvConfig();
+  if (!cfg || state.isInvincible || state.isGameOver) return;
+
+  state.isInvincible = true;
+  dom.button.classList.add('invincible');
+  dom.invLabel.textContent = '[ SCHILD AKTIV ]';
+  dom.invLabel.classList.add('active');
+
+  showMeme('inv');
+
+  state.invTimer = setTimeout(endInvincibility, cfg.durationMs);
+}
+
+function endInvincibility() {
+  state.isInvincible = false;
+  dom.button.classList.remove('invincible');
+  dom.invLabel.classList.remove('active');
+  state.invTimer = null;
+  scheduleNextInv();
+}
+
+function scheduleNextInv() {
+  const cfg = getEffectiveInvConfig();
+  if (!cfg || state.isGameOver) return;
+  state.invCooldownTimer = setTimeout(startInvincibility, cfg.cooldownMs);
+}
+
 // ─── CLICK HANDLER ─────────────────────────────────────────────────────────
 
 function handleClick(e) {
   if (state.isGameOver) return;
+
+  if (state.isInvincible) {
+    spawnParticles(e.clientX, e.clientY, 4, 0);
+    triggerHitAnimation(0);
+    return;
+  }
 
   if (state.startTime === null) state.startTime = Date.now();
 
