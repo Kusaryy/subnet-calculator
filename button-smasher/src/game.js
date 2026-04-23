@@ -556,53 +556,6 @@ function updateUI(cps) {
     cps >= 6  ? 'cps-high'   : '';
 }
 
-// ─── GAME OVER → WIN + BREAK-SEQUENZ ──────────────────────────────────────
-
-function triggerGameOver() {
-  if (state.isGameOver) return;
-  state.isGameOver = true;
-
-  stopDecay();
-
-  // Button kaputt
-  dom.button.setAttribute('data-phase', 'broken');
-  dom.hitLayer.classList.remove('anim-hit-a','anim-hit-b','anim-hit-c','anim-rage','anim-heated');
-  dom.button.classList.add('broken-final');
-  dom.buttonText.textContent = '💀';
-  dom.tauntText.textContent = '...du hast es wirklich getan. Du absolutes Monster.';
-  dom.tauntText.classList.remove('taunt-flash');
-
-  // Win-Sound (Fanfare → Explosion)
-  audio.playWin();
-
-  // Weißer Flash + Shake-Kaskade
-  dom.flashOverlay.classList.add('flash-white');
-  setTimeout(() => dom.flashOverlay.classList.remove('flash-white'), 160);
-
-  let ticks = 0;
-  const shakeInterval = setInterval(() => {
-    screenShake('heavy');
-    if (++ticks >= 6) clearInterval(shakeInterval);
-  }, 85);
-
-  // Phase 1: Spiel fängt an zu brechen (Glitch-Overlay + Body-Distortion)
-  setTimeout(() => {
-    document.body.classList.add('game-breaking');
-    dom.breakOverlay.classList.add('active');
-  }, 1300);
-
-  // Phase 2: Fake-Fehlermeldung einblenden
-  setTimeout(() => {
-    dom.breakMessage.classList.add('visible');
-  }, 1700);
-
-  // Phase 3: Alles schwarz → Fenster schließen
-  setTimeout(() => {
-    dom.breakMessage.classList.add('closing');
-    setTimeout(() => window.close(), 600);
-  }, 3800);
-}
-
 // ─── LEVEL TRANSITIONS ─────────────────────────────────────────────────────
 
 function updateLevelUI() {
