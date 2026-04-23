@@ -143,6 +143,53 @@ const TAUNTS = {
     'Du nennst das Smashen? Ich nenn das Urlaub.',
     'Ich heile gerade buchstäblich. In Echtzeit. Und beobachte dein Versagen.',
   ],
+  l1: [
+    'Ist das ALLES? Meine Oma klickt härter. Die ist seit 12 Jahren tot.',
+    'lol. nett versucht. Ich hab Zeit. Ich bin ein Button.',
+    'Klick ruhig weiter. Ich warte. Ich hab keine Angst vor dir.',
+    'Ooooh gruselig. SEHR gruselig. NULL Gruseln bei mir.',
+    'Mein Entwickler hat mich für genau diesen Moment gebaut. Ich bin SO. WAS. GELANGWEILT.',
+  ],
+  l2: [
+    'Warte— okay. Das war... hm. Nein. Ich bin okay.',
+    'Ich hab jetzt einen Schild. Hast du einen Schild? Nein? Schade.',
+    'SCHILD AKTIV. Was machst du jetzt, Klick-Goblin?',
+    'Oh interessant. Du versuchst es trotzdem. Ich respektiere das nicht.',
+    'Ich regeneriere. In Echtzeit. Und du schaust zu. Peinlich.',
+  ],
+  l3: [
+    'WARTE— wo bin ich hin— ich BIN NOCH HIER!',
+    'Du wirst mich nicht erwischen. Ich bin SCHNELL.',
+    'Nein nein nein— ich beweg mich einfach weg. Problem gelöst.',
+    'FANG MICH DOCH! (bitte nicht fangen)',
+    'Ich dachte Bewegung würde helfen. Vielleicht. Mal sehen.',
+  ],
+  l4: [
+    '[PANIK.exe reagiert nicht]',
+    'DAS HÄTTE NICHT PASSIEREN DÜRFEN',
+    'ICH HALTE DAGEGEN. SIEH HER. ICH— WARTE—',
+    'N-NEIN. NEIN. NEEEIN.',
+    'GEGENANGRIFF. ICH GREIFE ZURÜCK. JA. DAS MACHE ICH.',
+  ],
+  l5f1: [
+    'Du hast es bis hierher geschafft. Gut. Jetzt stirbst du hier.',
+    'ERSTE FORM. Ich hab noch zwei weitere. Viel Spaß.',
+    'Bereit? Ich bin bereit. Ich war immer bereit.',
+    'Du weißt nicht was dich erwartet. Ich schon.',
+  ],
+  l5f2: [
+    'ZWEITE FORM AKTIVIERT. Du hast mich wütend gemacht.',
+    'Das war meine freundliche Seite. WILLKOMMEN IN DER ZWEITEN FORM.',
+    'OH. DU WILLST WIRKLICH KÄMPFEN. GUT. LASS UNS KÄMPFEN.',
+    'Ich bin jetzt NICHT mehr höflich.',
+  ],
+  l5f3: [
+    'LETZTE FORM. ICH BIN NICHT FERTIG.',
+    'ALLES ODER NICHTS. ICH FÜRCHTE NICHTS. ICH LÜGE.',
+    'DIE PIXEL— DIE PIXEL VERLASSEN MEINEN KÖRPER—',
+    'WENN ICH GEHE, NEHME ICH DEINE MAUS MIT!!!',
+    'ICH BEREUE JEDEN EINZELNEN TAUNT. JEDEN. EINZELNEN.',
+  ],
 };
 
 const BUTTON_LABELS = {
@@ -250,11 +297,18 @@ function updateTaunt(cps) {
   state.lastTauntAt = now;
 
   let text;
+  const lvl = state.currentLevel.id;
+
   if (cps >= 8 && state.combo >= 5) {
     text = nextTaunt('comboBig');
+  } else if (lvl === 5 && state.currentSubPhase === 3) {
+    text = nextTaunt('l5f3');
+  } else if (lvl === 5 && state.currentSubPhase === 2) {
+    text = nextTaunt('l5f2');
+  } else if (lvl === 5) {
+    text = nextTaunt('l5f1');
   } else {
-    const key = `phase${Math.min(state.phase, 4)}`;
-    text = nextTaunt(key);
+    text = nextTaunt(`l${lvl}`);
   }
 
   dom.tauntText.classList.remove('taunt-flash');
