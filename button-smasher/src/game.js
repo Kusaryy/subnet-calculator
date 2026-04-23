@@ -382,6 +382,8 @@ function syncPhase() {
   dom.tauntText.classList.remove('taunt-flash');
   void dom.tauntText.offsetWidth;
   dom.tauntText.classList.add('taunt-flash');
+
+  if (state.currentLevel.id === 5) syncSubPhase();
 }
 
 // ─── DECAY ─────────────────────────────────────────────────────────────────
@@ -818,6 +820,48 @@ function scheduleNextInv() {
   const cfg = getEffectiveInvConfig();
   if (!cfg || state.isGameOver) return;
   state.invCooldownTimer = setTimeout(startInvincibility, cfg.cooldownMs);
+}
+
+// ─── LEVEL 5 SUB-PHASES ────────────────────────────────────────────────────
+
+function getSubPhaseFor(hp) {
+  const subs = state.currentLevel.subPhases;
+  if (!subs) return null;
+  for (const [key, sub] of Object.entries(subs)) {
+    if (hp >= sub.hpMin && hp <= sub.hpMax) return parseInt(key);
+  }
+  return 1;
+}
+
+function syncSubPhase() {
+  if (!state.currentLevel.subPhases) return;
+
+  const newSub = getSubPhaseFor(state.damage);
+  if (newSub === state.currentSubPhase) return;
+
+  state.currentSubPhase = newSub;
+  dom.button.setAttribute('data-sub', newSub);
+
+  const subInfo = state.currentLevel.subPhases[newSub];
+
+  dom.flashOverlay.classList.add('flash-white');
+  setTimeout(() => dom.flashOverlay.classList.remove('flash-white'), 220);
+  screenShake('heavy');
+  audio.playSubPhaseString(newSub);
+
+  dom.tauntText.classList.remove('taunt-flash');
+  void dom.tauntText.offsetWidth;
+  dom.tauntText.textContent = `${(subInfo?.name || 'Form ' + newSub).toUpperCase()} AKTIVIERT.`;
+  dom.tauntText.classList.add('taunt-flash');
+
+  if (newSub === 2) showMeme('thisisfine');
+  if (newSub === 3) showMeme('nope');
+
+  if (state.moveTimer)        { clearTimeout(state.moveTimer);        state.moveTimer = null; }
+  if (state.invTimer)         { clearTimeout(state.invTimer);         state.invTimer = null; }
+  if (state.invCooldownTimer) { clearTimeout(state.invCooldownTimer); state.invCooldownTimer = null; }
+  scheduleNextMove();
+  scheduleNextInv();
 }
 
 // ─── COUNTER-ATTACK ────────────────────────────────────────────────────────
