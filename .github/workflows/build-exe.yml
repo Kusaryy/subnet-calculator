@@ -42,6 +42,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           pyinstaller --windowed --name "Subnetzrechner" subnet_gui.py
+          codesign --deep --force --sign - dist/Subnetzrechner.app
           cd dist && zip -r Subnetzrechner.zip Subnetzrechner.app
 
       - name: Artifact hochladen
@@ -79,7 +80,26 @@ jobs:
             | Plattform | Datei |
             |-----------|-------|
             | Windows   | `Subnetzrechner.exe` — direkt ausführbar |
-            | macOS     | `Subnetzrechner.zip` — entpacken, dann `Subnetzrechner.app` öffnen |
+            | macOS     | `Subnetzrechner.zip` — siehe Anleitung unten |
+
+            ### macOS Installation
+
+            Da die App nicht von Apple notarisiert ist, erscheint eine Sicherheitswarnung. So öffnest du sie trotzdem:
+
+            **Option 1 – Terminal (empfohlen):**
+            ```bash
+            xattr -cr ~/Downloads/Subnetzrechner.app
+            open ~/Downloads/Subnetzrechner.app
+            ```
+
+            **Option 2 – Rechtsklick:**
+            1. ZIP entpacken
+            2. **Rechtsklick** auf `Subnetzrechner.app` → **Öffnen**
+            3. Im Dialog auf **Öffnen** klicken (nicht Abbrechen)
+
+            **Option 3 – Systemeinstellungen:**
+            1. App einmal anklicken (schlägt fehl)
+            2. Systemeinstellungen → Datenschutz & Sicherheit → **Trotzdem öffnen**
           files: |
             artifacts/Subnetzrechner-Windows/Subnetzrechner.exe
             artifacts/Subnetzrechner-macOS/Subnetzrechner.zip
