@@ -246,6 +246,7 @@ function buildState() {
 
     hitsSinceLastCounter: 0,
     counterActive: false,
+    counterTimer: null,
 
     memeTimer: null,
 
@@ -582,6 +583,7 @@ function clearAllTimers() {
   if (state.invTimer)         { clearTimeout(state.invTimer);         state.invTimer = null; }
   if (state.invCooldownTimer) { clearTimeout(state.invCooldownTimer); state.invCooldownTimer = null; }
   if (state.memeTimer)        { clearTimeout(state.memeTimer);        state.memeTimer = null; }
+  if (state.counterTimer)     { clearTimeout(state.counterTimer);     state.counterTimer = null; }
 }
 
 function startLevel(levelIdx) {
@@ -594,6 +596,7 @@ function startLevel(levelIdx) {
   state.btnOffsetX      = 0;
   state.btnOffsetY      = 0;
   state.hitsSinceLastCounter = 0;
+  state.counterActive = false;
   state.currentSubPhase = state.currentLevel.subPhases ? 1 : null;
 
   clearAllTimers();
@@ -601,6 +604,7 @@ function startLevel(levelIdx) {
   dom.button.className  = '';
   dom.button.setAttribute('data-phase', '1');
   dom.button.setAttribute('data-level', state.currentLevel.id);
+  document.body.setAttribute('data-phase', '1');
   dom.button.style.setProperty('--btn-scale', '1');
 
   if (state.currentSubPhase !== null) {
@@ -611,6 +615,8 @@ function startLevel(levelIdx) {
 
   dom.buttonText.textContent = nextLabel(1);
   dom.buttonArea.style.transform = '';
+  dom.buttonArea.classList.remove('teleport');
+  dom.caOverlay.classList.remove('active');
   dom.invLabel.textContent = '';
   dom.invLabel.classList.remove('active');
 
@@ -742,7 +748,7 @@ function getEffectiveInvConfig() {
   if (!lvl.invincible.enabled) return null;
   if (lvl.id === 5 && state.currentSubPhase) {
     const sub = lvl.subPhases[state.currentSubPhase];
-    if (sub?.invincible) return { enabled: true, durationMs: lvl.invincible.durationMs, cooldownMs: lvl.invincible.cooldownMs, ...sub.invincible };
+    if (sub?.invincible) return { ...lvl.invincible, ...sub.invincible };
   }
   return lvl.invincible;
 }
@@ -789,7 +795,7 @@ function getSubPhaseFor(hp) {
 function syncSubPhase() {
   if (!state.currentLevel.subPhases) return;
 
-  const newSub = getSubPhaseFor(state.damage);
+  const newSub = getSubPhaseFor(state.currentLevel.hp - state.damage);
   if (newSub === state.currentSubPhase) return;
 
   state.currentSubPhase = newSub;
@@ -810,6 +816,11 @@ function syncSubPhase() {
   if (newSub === 2) showMeme('thisisfine');
   if (newSub === 3) showMeme('nope');
 
+  if (state.isInvincible) {
+    state.isInvincible = false;
+    dom.button.classList.remove('invincible');
+    dom.invLabel.classList.remove('active');
+  }
   if (state.moveTimer)        { clearTimeout(state.moveTimer);        state.moveTimer = null; }
   if (state.invTimer)         { clearTimeout(state.invTimer);         state.invTimer = null; }
   if (state.invCooldownTimer) { clearTimeout(state.invCooldownTimer); state.invCooldownTimer = null; }
@@ -841,9 +852,10 @@ function triggerCounterAttack() {
   showMeme('counter');
 
   const cfg = getEffectiveCounterConfig();
-  setTimeout(() => {
+  state.counterTimer = setTimeout(() => {
     dom.caOverlay.classList.remove('active');
     state.counterActive = false;
+    state.counterTimer = null;
   }, (cfg?.durationMs ?? 800) + 400);
 }
 
