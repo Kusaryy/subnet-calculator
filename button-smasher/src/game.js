@@ -384,6 +384,9 @@ function syncPhase() {
   void dom.tauntText.offsetWidth;
   dom.tauntText.classList.add('taunt-flash');
 
+  const hpPct = state.damage / state.currentLevel.hp;
+  dom.button.style.setProperty('--btn-scale', hpPct < 0.3 ? 0.85 : 1.0);
+
   if (state.currentLevel.id === 5) syncSubPhase();
 }
 
@@ -411,15 +414,17 @@ function stopDecay() {
 // ─── HIT ANIMATIONS (applied to wrapper, not button itself) ───────────────
 
 const HIT_VARIANTS  = ['anim-hit-a', 'anim-hit-b', 'anim-hit-c'];
-const HIT_DURATIONS = { 'anim-hit-a': 240, 'anim-hit-b': 270, 'anim-hit-c': 220, 'anim-rage': 170, 'anim-heated': 200 };
+const HIT_DURATIONS = { 'anim-hit-a': 240, 'anim-hit-b': 270, 'anim-hit-c': 220, 'anim-rage': 170, 'anim-heated': 200, 'anim-crush': 130 };
 
 function triggerHitAnimation(cps) {
   const el = dom.hitLayer;
-  el.classList.remove('anim-hit-a', 'anim-hit-b', 'anim-hit-c', 'anim-rage', 'anim-heated');
+  el.classList.remove('anim-hit-a', 'anim-hit-b', 'anim-hit-c', 'anim-rage', 'anim-heated', 'anim-crush');
   void el.offsetWidth;
 
   let cls;
-  if (cps >= 13) {
+  if (state.phase >= 4 || cps >= 15) {
+    cls = Math.random() < 0.4 ? 'anim-crush' : 'anim-rage';
+  } else if (cps >= 13) {
     cls = 'anim-rage';
   } else if (cps >= 6) {
     cls = 'anim-heated';
