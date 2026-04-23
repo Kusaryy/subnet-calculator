@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BUTTON SMASHER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- White flash on game over hit -->
+  <div id="flash-overlay"></div>
+
+  <!-- Particle / combo-pop layer -->
+  <div id="particles"></div>
+
+  <div class="app-layout">
+
+    <!-- ── HEADER ────────────────────────────────────── -->
+    <header class="header">
+      <h1 class="title">BUTTON SMASHER</h1>
+    </header>
+
+    <!-- ── STATS BAR ──────────────────────────────────── -->
+    <div class="stats-bar">
+      <div class="level-indicator">
+        <span class="level-label">LEVEL</span>
+        <span id="level-num">1<span class="level-sep">/</span>5</span>
+        <span id="level-name">Der Anfänger</span>
+      </div>
+      <div class="meter-wrap">
+        <div class="meter-labels">
+          <span>BREAK METER</span>
+          <span id="damage-value">0%</span>
+        </div>
+        <div class="meter-track">
+          <div id="damage-bar"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── GAME SCREEN ────────────────────────────────── -->
+    <div id="game-screen">
+
+      <!-- Taunting provocation text -->
+      <p id="taunt-text">Press the button. If you dare.</p>
+
+      <!-- The button (hit-layer handles click-response animations) -->
+      <div class="button-area">
+        <div id="button-hit-layer" class="button-hit-layer">
+          <button id="smash-button" data-phase="1">
+            <!-- Progressive crack overlays -->
+            <div class="crack-layer crack-1"></div>
+            <div class="crack-layer crack-2"></div>
+            <div class="crack-layer crack-3"></div>
+            <div class="crack-layer crack-4"></div>
+            <div class="crack-layer crack-5"></div>
+            <span id="button-text">CLICK ME</span>
+          </button>
+        </div>
+      </div>
+
+      <div id="inv-label" class="inv-label" aria-hidden="true"></div>
+
+      <!-- Combo + CPS row -->
+      <div class="info-row">
+        <span id="combo-display"></span>
+        <span id="cps-display">0 CPS</span>
+      </div>
+
+    </div><!-- #game-screen -->
+
+  </div><!-- .app-layout -->
+
+  <!-- ── BREAK-OVERLAYS (nach Button-Tod) ──────────────── -->
+  <div id="break-overlay"></div>
+
+  <div id="break-message">
+    <div class="bm-box">
+      <div class="bm-title">⚠ FATALER FEHLER ⚠</div>
+      <div class="bm-code">BUTTON_INTEGRITY_VIOLATION (0x0000DEAD)</div>
+      <div class="bm-text">
+        Du hast ihn wirklich kaputt gemacht.<br>
+        Das hätte kein Mensch geschafft. Eigentlich.<br>
+        Ich weiß nicht ob ich das respektiere oder hasse.<br>
+        Beides.
+        <span class="bm-closing">SCHLIESSE ANWENDUNG...</span>
+      </div>
+    </div>
+  </div>
+
+  <div id="meme-card" aria-hidden="true">
+    <div id="meme-inner">
+      <div id="meme-emoji"></div>
+      <div id="meme-text"></div>
+      <img id="meme-gif" src="" alt="" />
+    </div>
+  </div>
+
+  <div id="level-transition">
+    <div class="lt-content">
+      <div id="lt-destroyed">LEVEL <span id="lt-level-num">1</span> ZERSTÖRT</div>
+      <div id="lt-announce"></div>
+    </div>
+  </div>
+
+  <div id="counter-attack-overlay">
+    <div class="ca-text">⚡ GEGENANGRIFF ⚡</div>
+  </div>
+
+  <div id="victory-screen">
+    <div class="victory-box">
+      <div class="victory-title">DU HAST IHN ZERSTÖRT.</div>
+      <div class="victory-code">BUTTON_INTEGRITY: 0x00000000</div>
+      <img id="victory-gif" src="assets/memes/meme-win.gif" alt="victory" />
+      <div class="stats-grid">
+        <div class="stat-card"><div class="sc-label">KLICKS</div><div class="sc-value" id="v-clicks">0</div></div>
+        <div class="stat-card"><div class="sc-label">ZEIT</div><div class="sc-value" id="v-time">0:00</div></div>
+        <div class="stat-card"><div class="sc-label">MAX CPS</div><div class="sc-value" id="v-cps">0</div></div>
+        <div class="stat-card"><div class="sc-label">MAX COMBO</div><div class="sc-value" id="v-combo">0</div></div>
+      </div>
+      <div class="victory-epitaph">„...respekt. du hattest keine chance. und trotzdem."</div>
+      <button id="restart-btn">NOCHMAL</button>
+    </div>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
