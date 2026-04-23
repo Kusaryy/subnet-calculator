@@ -274,10 +274,11 @@ function getCPS() {
 // ─── PHASE MANAGEMENT ──────────────────────────────────────────────────────
 
 function phaseFor(damage) {
-  if (damage >= 1000) return 5;
-  if (damage >= 750)  return 4;
-  if (damage >= 500)  return 3;
-  if (damage >= 250)  return 2;
+  const hp = state.currentLevel.hp;
+  if (damage >= hp)         return 5;
+  if (damage >= hp * 0.75)  return 4;
+  if (damage >= hp * 0.5)   return 3;
+  if (damage >= hp * 0.25)  return 2;
   return 1;
 }
 
@@ -310,10 +311,9 @@ function syncPhase() {
 
 function tickDecay() {
   if (state.isGameOver || state.damage <= 0) return;
-
-  const rate = CFG.DECAY_PER_PHASE[state.phase] ?? CFG.DECAY_PER_PHASE[1];
+  const rates = state.currentLevel.decayPerPhase;
+  const rate  = rates[Math.min(state.phase, rates.length - 1)] ?? rates[1];
   state.damage = Math.max(0, state.damage - rate);
-
   updateUI(getCPS());
   syncPhase();
 }
@@ -402,8 +402,8 @@ function spawnComboText(x, y, combo) {
 // ─── UI UPDATE ─────────────────────────────────────────────────────────────
 
 function updateUI(cps) {
-  // Damage bar
-  const pct = (state.damage / CFG.MAX_DAMAGE) * 100;
+  const maxHp = state.currentLevel.hp;
+  const pct   = (state.damage / maxHp) * 100;
   dom.damageBar.style.width = `${pct}%`;
   dom.damageValue.textContent = `${Math.round(pct)}%`;
 
@@ -512,7 +512,7 @@ function handleClick(e) {
   // Damage
   const comboMult = Math.min(1 + state.combo * CFG.COMBO_MULTIPLIER, CFG.MAX_COMBO_MULT);
   const dmg = Math.round(CFG.BASE_DAMAGE * comboMult);
-  state.damage = Math.min(state.damage + dmg, CFG.MAX_DAMAGE);
+  state.damage = Math.min(state.damage + dmg, state.currentLevel.hp);
 
   // Audio
   audio.playHit(cps, state.combo);
@@ -538,7 +538,7 @@ function handleClick(e) {
   updateUI(cps);
   syncPhase();
 
-  if (state.damage >= CFG.MAX_DAMAGE) triggerGameOver();
+  if (state.damage >= state.currentLevel.hp) triggerLevelComplete();
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
