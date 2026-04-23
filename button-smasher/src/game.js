@@ -601,6 +601,144 @@ function triggerGameOver() {
   }, 3800);
 }
 
+// ─── LEVEL TRANSITIONS ─────────────────────────────────────────────────────
+
+function updateLevelUI() {
+  const lvl = state.currentLevel;
+  dom.levelNum.innerHTML    = `${lvl.id}<span class="level-sep">/</span>5`;
+  dom.levelName.textContent = lvl.name;
+  dom.button.setAttribute('data-level', lvl.id);
+}
+
+function spawnShockwave() {
+  const r  = dom.button.getBoundingClientRect();
+  const cx = r.left + r.width  / 2;
+  const cy = r.top  + r.height / 2;
+  const el = document.createElement('div');
+  el.className = 'shockwave';
+  el.style.cssText = `left:${cx}px;top:${cy}px;width:${r.width}px;height:${r.height}px;`;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 680);
+}
+
+function clearAllTimers() {
+  stopDecay();
+  if (state.moveTimer)        { clearTimeout(state.moveTimer);        state.moveTimer = null; }
+  if (state.invTimer)         { clearTimeout(state.invTimer);         state.invTimer = null; }
+  if (state.invCooldownTimer) { clearTimeout(state.invCooldownTimer); state.invCooldownTimer = null; }
+  if (state.memeTimer)        { clearTimeout(state.memeTimer);        state.memeTimer = null; }
+}
+
+function startLevel(levelIdx) {
+  state.currentLevelIdx = levelIdx;
+  state.currentLevel    = LEVELS[levelIdx];
+  state.damage          = 0;
+  state.combo           = 0;
+  state.phase           = 1;
+  state.isInvincible    = false;
+  state.btnOffsetX      = 0;
+  state.btnOffsetY      = 0;
+  state.hitsSinceLastCounter = 0;
+  state.currentSubPhase = state.currentLevel.subPhases ? 1 : null;
+
+  clearAllTimers();
+
+  dom.button.className  = '';
+  dom.button.setAttribute('data-phase', '1');
+  dom.button.setAttribute('data-level', state.currentLevel.id);
+  dom.button.style.setProperty('--btn-scale', '1');
+
+  if (state.currentSubPhase !== null) {
+    dom.button.setAttribute('data-sub', state.currentSubPhase);
+  } else {
+    dom.button.removeAttribute('data-sub');
+  }
+
+  dom.buttonText.textContent = nextLabel(1);
+  dom.buttonArea.style.transform = '';
+  dom.invLabel.textContent = '';
+  dom.invLabel.classList.remove('active');
+
+  updateLevelUI();
+  updateUI(0);
+
+  startDecay();
+  scheduleNextMove();
+  scheduleNextInv();
+  scheduleMeme();
+
+  if (state.currentLevel.id === 3) setTimeout(() => showMeme('speed'), 3500);
+  if (state.currentLevel.id === 4) setTimeout(() => showMeme('panik'), 2500);
+}
+
+function triggerLevelComplete() {
+  if (state.isGameOver) return;
+  state.isGameOver = true;
+  clearAllTimers();
+
+  dom.button.classList.add('broken-final');
+  dom.buttonText.textContent = '💀';
+  dom.tauntText.textContent  = '...okay. diese Runde geht an dich.';
+
+  audio.playWin();
+
+  dom.flashOverlay.classList.add('flash-white');
+  setTimeout(() => dom.flashOverlay.classList.remove('flash-white'), 160);
+  spawnShockwave();
+
+  const r = dom.button.getBoundingClientRect();
+  spawnParticles(r.left + r.width / 2, r.top + r.height / 2, 45, 15);
+
+  const isLast = state.currentLevelIdx >= LEVELS.length - 1;
+
+  if (isLast) {
+    triggerVictory();
+    return;
+  }
+
+  setTimeout(() => {
+    dom.ltLevelNum.textContent = state.currentLevel.id;
+    dom.levelTransition.classList.add('visible');
+
+    setTimeout(() => {
+      const next = LEVELS[state.currentLevelIdx + 1];
+      dom.ltAnnounce.textContent = `LEVEL ${next.id}: ${next.name.toUpperCase()}`;
+      dom.levelTransition.classList.add('announcing');
+
+      setTimeout(() => {
+        dom.levelTransition.classList.remove('visible', 'announcing');
+        state.isGameOver = false;
+        startLevel(state.currentLevelIdx + 1);
+      }, 1500);
+    }, 800);
+  }, 1000);
+}
+
+function triggerVictory() {
+  setTimeout(() => spawnShockwave(), 120);
+  setTimeout(() => spawnShockwave(), 300);
+  setTimeout(() => spawnShockwave(), 500);
+
+  audio.playVictoryFanfare();
+
+  const elapsed = state.startTime ? Math.floor((Date.now() - state.startTime) / 1000) : 0;
+  const mins    = Math.floor(elapsed / 60);
+  const secs    = elapsed % 60;
+
+  const r = dom.button.getBoundingClientRect();
+  for (let i = 0; i < 3; i++) {
+    setTimeout(() => spawnParticles(r.left + r.width / 2, r.top + r.height / 2, 20, 18), i * 200);
+  }
+
+  setTimeout(() => {
+    dom.vClicks.textContent = state.totalClicks.toLocaleString();
+    dom.vTime.textContent   = `${mins}:${String(secs).padStart(2, '0')}`;
+    dom.vCps.textContent    = state.maxCPS;
+    dom.vCombo.textContent  = `×${state.maxCombo}`;
+    dom.victoryScreen.classList.add('visible');
+  }, 2200);
+}
+
 // ─── CLICK HANDLER ─────────────────────────────────────────────────────────
 
 function handleClick(e) {
