@@ -1,4 +1,4 @@
-name: Build Windows EXE
+name: Build Subnetzrechner
 
 on:
   push:
@@ -7,7 +7,17 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            name: Subnetzrechner-Windows
+            artifact: dist/Subnetzrechner.exe
+          - os: macos-latest
+            name: Subnetzrechner-macOS
+            artifact: dist/Subnetzrechner.zip
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -19,26 +29,56 @@ jobs:
           python-version: "3.12"
 
       - name: Abhängigkeiten installieren
-        run: |
-          pip install PyQt6 pyinstaller
+        run: pip install PyQt6 pyinstaller
 
-      - name: EXE bauen
-        run: |
-          pyinstaller --onefile --windowed --name "Subnetzrechner" subnet_gui.py
+      - name: EXE bauen (Windows)
+        if: runner.os == 'Windows'
+        run: pyinstaller --onefile --windowed --name "Subnetzrechner" subnet_gui.py
 
-      - name: EXE als Artifact hochladen
+      - name: App bauen (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          pyinstaller --windowed --name "Subnetzrechner" subnet_gui.py
+          cd dist && zip -r Subnetzrechner.zip Subnetzrechner.app
+
+      - name: Artifact hochladen
         uses: actions/upload-artifact@v4
         with:
-          name: Subnetzrechner-Windows
-          path: dist/Subnetzrechner.exe
+          name: ${{ matrix.name }}
+          path: ${{ matrix.artifact }}
           retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Artifacts herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
 
       - name: Release erstellen
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ github.run_number }}
           name: "Subnetzrechner v${{ github.run_number }}"
-          body: "Automatisch gebaute Windows-EXE aus dem aktuellen Commit."
-          files: dist/Subnetzrechner.exe
+          body: |
+            ## Subnetzrechner
+
+            Automatisch gebaute Binärdateien für Windows und macOS.
+
+            | Plattform | Datei |
+            |-----------|-------|
+            | Windows   | `Subnetzrechner.exe` — direkt ausführbar |
+            | macOS     | `Subnetzrechner.zip` — entpacken, dann `Subnetzrechner.app` öffnen |
+          files: |
+            artifacts/Subnetzrechner-Windows/Subnetzrechner.exe
+            artifacts/Subnetzrechner-macOS/Subnetzrechner.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
