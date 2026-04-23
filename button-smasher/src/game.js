@@ -739,6 +739,47 @@ function triggerVictory() {
   }, 2200);
 }
 
+// ─── MOVEMENT ──────────────────────────────────────────────────────────────
+
+function getEffectiveMoveConfig() {
+  const lvl = state.currentLevel;
+  if (!lvl.movement.enabled) return null;
+  if (lvl.id === 5 && state.currentSubPhase) {
+    const sub = lvl.subPhases[state.currentSubPhase];
+    if (sub?.movement) return { ...lvl.movement, ...sub.movement };
+  }
+  return lvl.movement;
+}
+
+function moveButton() {
+  const cfg = getEffectiveMoveConfig();
+  if (!cfg || state.isGameOver) return;
+
+  const max  = cfg.maxOffsetPx;
+  const newX = (Math.random() * 2 - 1) * max;
+  const newY = (Math.random() * 2 - 1) * (max * 0.45);
+
+  state.btnOffsetX = newX;
+  state.btnOffsetY = newY;
+
+  if (cfg.teleport) {
+    dom.buttonArea.classList.add('teleport');
+    dom.buttonArea.style.transform = `translate(${newX}px, ${newY}px)`;
+    requestAnimationFrame(() => dom.buttonArea.classList.remove('teleport'));
+  } else {
+    dom.buttonArea.classList.remove('teleport');
+    dom.buttonArea.style.transform = `translate(${newX}px, ${newY}px)`;
+  }
+
+  scheduleNextMove();
+}
+
+function scheduleNextMove() {
+  const cfg = getEffectiveMoveConfig();
+  if (!cfg || state.isGameOver) return;
+  state.moveTimer = setTimeout(moveButton, cfg.intervalMs);
+}
+
 // ─── INVINCIBILITY ─────────────────────────────────────────────────────────
 
 function getEffectiveInvConfig() {
