@@ -247,6 +247,7 @@ function buildState() {
     hitsSinceLastCounter: 0,
     counterActive: false,
     counterTimer: null,
+    introMemeTimer: null,
 
     memeTimer: null,
 
@@ -365,8 +366,8 @@ function syncPhase() {
   const goingDown = newPhase < state.phase;
   state.phase = newPhase;
 
-  dom.button.setAttribute('data-phase', newPhase);
-  document.body.setAttribute('data-phase', newPhase);
+  dom.button.setAttribute('data-phase', Math.min(newPhase, 4));
+  document.body.setAttribute('data-phase', Math.min(newPhase, 4));
   dom.buttonText.textContent = nextLabel(newPhase);
 
   if (goingDown) {
@@ -587,6 +588,8 @@ function clearAllTimers() {
   if (state.invCooldownTimer) { clearTimeout(state.invCooldownTimer); state.invCooldownTimer = null; }
   if (state.memeTimer)        { clearTimeout(state.memeTimer);        state.memeTimer = null; }
   if (state.counterTimer)     { clearTimeout(state.counterTimer);     state.counterTimer = null; }
+  if (memeHideTimer)           { clearTimeout(memeHideTimer);            memeHideTimer = null; }
+  if (state.introMemeTimer)   { clearTimeout(state.introMemeTimer);    state.introMemeTimer = null; }
 }
 
 function startLevel(levelIdx) {
@@ -631,8 +634,8 @@ function startLevel(levelIdx) {
   scheduleNextInv();
   scheduleMeme();
 
-  if (state.currentLevel.id === 3) setTimeout(() => showMeme('speed'), 3500);
-  if (state.currentLevel.id === 4) setTimeout(() => showMeme('panik'), 2500);
+  if (state.currentLevel.id === 3) state.introMemeTimer = setTimeout(() => showMeme('speed'), 3500);
+  if (state.currentLevel.id === 4) state.introMemeTimer = setTimeout(() => showMeme('panik'), 2500);
 }
 
 function triggerLevelComplete() {
@@ -729,7 +732,7 @@ function moveButton() {
   if (cfg.teleport) {
     dom.buttonArea.classList.add('teleport');
     dom.buttonArea.style.transform = `translate(${newX}px, ${newY}px)`;
-    requestAnimationFrame(() => dom.buttonArea.classList.remove('teleport'));
+    requestAnimationFrame(() => requestAnimationFrame(() => dom.buttonArea.classList.remove('teleport')));
   } else {
     dom.buttonArea.classList.remove('teleport');
     dom.buttonArea.style.transform = `translate(${newX}px, ${newY}px)`;
@@ -929,9 +932,9 @@ function handleClick(e) {
 
   updateTaunt(cps);
   updateUI(cps);
-  syncPhase();
 
-  if (state.damage >= state.currentLevel.hp) triggerLevelComplete();
+  if (state.damage >= state.currentLevel.hp) { triggerLevelComplete(); return; }
+  syncPhase();
 }
 
 // ─── INIT ──────────────────────────────────────────────────────────────────

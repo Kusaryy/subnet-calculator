@@ -38,14 +38,15 @@ const audio = {
     try {
       const c = ctx();
       const freqs = [0, 220, 330, 440, 600];
+      const freq  = freqs[Math.min(phase, freqs.length - 1)];
       const osc = c.createOscillator();
       const gain = c.createGain();
       osc.connect(gain);
       gain.connect(c.destination);
 
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(freqs[phase] * 0.5, c.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(freqs[phase], c.currentTime + 0.25);
+      osc.frequency.setValueAtTime(freq * 0.5, c.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(freq, c.currentTime + 0.25);
 
       gain.gain.setValueAtTime(0.22, c.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + 0.4);
