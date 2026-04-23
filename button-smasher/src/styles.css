@@ -1016,6 +1016,9 @@ body.game-breaking {
   color: #ff2020;
   text-shadow: 0 0 30px #ff2020;
   letter-spacing: 0.2em;
+  opacity: 0;
+}
+#counter-attack-overlay.active .ca-text {
   animation: ca-text-in 0.9s ease-out forwards;
 }
 @keyframes ca-text-in {
