@@ -154,15 +154,15 @@ electron-builder Config in `package.json`:
 ## Aufgabenliste (Phase 2 — Implementierung)
 
 ```
-[ ] Task 1: Projekt-Scaffold (package.json, main.js, index.html, styles.css, Stubs)
-[ ] Task 2: Audio Engine (Beat-Scheduler + alle SFX)
-[ ] Task 3: Combo System (InputBuffer + 4 Combo-Definitionen)
-[ ] Task 4: Character Drawing — Front + Back View
-[ ] Task 5: Animation System (ANIMATIONS-Objekt, update(), Effekte)
-[ ] Task 6: Game Loop + State Machine (alle 4 States vollständig)
-[ ] Task 7: Combo-Wiring + Tuning (manueller Test aller 4 Combos)
-[ ] Task 8: Dokumentation (PROJECT_PLAN.md, HANDOFF.md, README.md)
-[ ] Task 9: Build-Verifikation (npm run build, EXE prüfen)
+[x] Task 1: Projekt-Scaffold (package.json, main.js, index.html, styles.css, Stubs)
+[x] Task 2: Audio Engine (Beat-Scheduler + alle SFX)
+[x] Task 3: Combo System (InputBuffer + 4 Combo-Definitionen)
+[x] Task 4: Character Drawing — Front + Back View
+[x] Task 5: Animation System (ANIMATIONS-Objekt, update(), Effekte)
+[x] Task 6: Game Loop + State Machine (alle 4 States vollständig)
+[x] Task 7: Combo-Wiring + Tuning (manueller Test aller 4 Combos)
+[x] Task 8: Dokumentation (PROJECT_PLAN.md, HANDOFF.md, README.md)
+[x] Task 9: Build-Verifikation (npm run build, EXE prüfen)
 ```
 
 ---
