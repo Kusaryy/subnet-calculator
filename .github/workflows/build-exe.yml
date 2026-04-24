@@ -19,6 +19,9 @@ jobs:
           - os: macos-latest
             name: Subnetzrechner-macOS
             artifact: dist/Subnetzrechner.zip
+          - os: ubuntu-latest
+            name: Subnetzrechner-Linux
+            artifact: dist/Subnetzrechner
 
     runs-on: ${{ matrix.os }}
 
@@ -44,6 +47,14 @@ jobs:
           pyinstaller --windowed --name "Subnetzrechner" subnet_gui.py
           codesign --deep --force --sign - dist/Subnetzrechner.app
           cd dist && zip -r Subnetzrechner.zip Subnetzrechner.app
+
+      - name: Abhängigkeiten installieren (Linux)
+        if: runner.os == 'Linux'
+        run: sudo apt-get install -y python3-tk
+
+      - name: Binary bauen (Linux)
+        if: runner.os == 'Linux'
+        run: pyinstaller --onefile --name "Subnetzrechner" subnet_gui.py
 
       - name: Artifact hochladen
         uses: actions/upload-artifact@v4
@@ -81,6 +92,7 @@ jobs:
             |-----------|-------|
             | Windows   | `Subnetzrechner.exe` — direkt ausführbar |
             | macOS     | `Subnetzrechner.zip` — siehe Anleitung unten |
+            | Linux     | `Subnetzrechner` — `chmod +x Subnetzrechner && ./Subnetzrechner` |
 
             ### macOS Installation
 
@@ -103,5 +115,6 @@ jobs:
           files: |
             artifacts/Subnetzrechner-Windows/Subnetzrechner.exe
             artifacts/Subnetzrechner-macOS/Subnetzrechner.zip
+            artifacts/Subnetzrechner-Linux/Subnetzrechner
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
