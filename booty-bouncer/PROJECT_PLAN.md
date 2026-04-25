@@ -27,11 +27,11 @@ booty-bouncer/
 - [x] Game Loop + State Machine (INTRO/MENU/GAMEPLAY/RESULT)
 - [x] Combo Wiring + Tuning
 - [x] Dokumentation (PROJECT_PLAN, HANDOFF, README)
-- [ ] Build-Verifikation (npm run build)
+- [x] Build-Verifikation (npm run build — dist/ erzeugt)
 
 ## Build-Status
 - npm start: funktioniert
-- npm run build: noch nicht geprüft
+- npm run build: Booty-Bouncer Setup 1.0.0.exe + Booty-Bouncer 1.0.0.exe (je 73 MB)
 
 ## Bekannte Probleme
 - Keine bekannten Bugs
