@@ -1,1 +1,7 @@
 .worktrees/
+build/
+dist/
+__pycache__/
+*.spec
+*.pyc
+node_modules/
