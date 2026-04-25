@@ -112,7 +112,7 @@ function handleCombo(comboDef) {
   char.screenShake(16, 300);
   char.flashEffect(RATING_COLORS[comboDef.rating] || '#ffffff', 200);
   char.spawnParticles(450, 420, 18, RATING_COLORS[comboDef.rating] || '#FFD700');
-  char.showRating(comboDef.label + '\n' + comboDef.rating, RATING_COLORS[comboDef.rating]);
+  char.showRating(comboDef.label, RATING_COLORS[comboDef.rating]);
 
   addScore(50);
   game.multiplier = Math.min(8, game.multiplier + comboDef.multiplierBonus);
