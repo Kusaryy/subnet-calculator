@@ -1,0 +1,34 @@
+{
+  "name": "booty-bouncer",
+  "version": "1.0.0",
+  "description": "The most ridiculous cartoon dance game ever created",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder --win --x64",
+    "build:linux": "electron-builder --linux --x64"
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.bootybouncer.app",
+    "productName": "Booty-Bouncer",
+    "directories": { "output": "dist" },
+    "win": {
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "portable", "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": true,
+      "createDesktopShortcut": true
+    },
+    "linux": {
+      "target": [{ "target": "AppImage", "arch": ["x64"] }],
+      "category": "Game"
+    }
+  }
+}
